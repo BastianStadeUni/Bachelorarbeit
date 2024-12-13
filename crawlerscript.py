@@ -16,7 +16,6 @@ from selenium.common.exceptions import (
 
 
 def scroll_full_website():
-    handle_popups()
     #Scroll to the bottom and to the top of the website
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
     time.sleep(1)
@@ -28,6 +27,9 @@ def click_random_buttons(number_of_buttons):
     for _ in range(number_of_buttons):
         handle_popups()
         buttons = driver.find_elements(By.XPATH, "//button")
+        if not buttons:
+            print("No buttons on this website...")
+            return
         clickable_buttons = [
             button for button in buttons if button.is_displayed() and button.is_enabled()
         ]
@@ -56,10 +58,10 @@ def click_random_links(number_of_links):
         clickable_links = [
             link for link in links if link.is_displayed() and link.is_enabled()
         ]
-        try:
-            if not clickable_links:
+        if not clickable_links:
                 print("No clickable links on this Website...")
                 return 
+        try:
             link = random.choice(clickable_links)
             link_href = link.get_attribute("href")
             driver.execute_script("arguments[0].scrollIntoView(true);", link)
@@ -68,18 +70,33 @@ def click_random_links(number_of_links):
             driver.execute_script("arguments[0].click();", link)
             time.sleep(3)
             handle_popups()
-
-            if driver.current_url != link_href:
-                print("returning to base tab")
-                driver.switch_to.window(base_tab)
-                time.sleep(1)
-            else:
-                print("returning to base tab")
-                driver.back()
-                time.sleep(1)
+            return_to_base_URL()
 
         except (ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException) as e:
             print(f"Could not click link: {e}")
+
+def interact_with_image(number_of_images):
+    for _ in range(number_of_images):
+        images = driver.find_elements(By.XPATH, "//img")
+        if not images:
+            print("No images found...")
+            return
+        clickable_images = [ 
+            image for image in images if image.is_displayed() and image.is_enabled()
+        ]
+        if not clickable_images:
+            print("No clickable images found...")
+            return
+        try:
+            image = random.choice(clickable_images)
+            driver.execute_script("arguments[0].scrollIntoView(true);", image)
+            time.sleep(1)
+            print(f"Clicking on Image with text: {image.text}")
+            driver.execute_script("arguments[0].click();", image)
+            time.sleep(2)
+        except (ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException) as e:
+            print(f"Could not click on picture: {e}")
+
 
 def interact_with_email_form():
     handle_popups()
@@ -143,14 +160,16 @@ def return_to_base_URL():
 
 options = Options()
 
+#service = Service(executable_path="/usr/bin/chromedriver")
 driver = webdriver.Chrome(options=options)
 #base_URL = "https://www.webscraper.io"
-base_URL = "https://cloud.webscraper.io/login?forward=%2Fjobs"
+base_URL = "https://www.animetoast.cc/"
 driver.get(base_URL)
 base_tab = driver.current_window_handle
 time.sleep(2)
 
 scroll_full_website()
+interact_with_image(2)
 click_random_buttons(3)
 click_random_links(3)
 interact_with_email_form()
