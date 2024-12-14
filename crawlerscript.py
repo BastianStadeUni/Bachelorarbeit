@@ -25,7 +25,6 @@ def scroll_full_website():
 
 def click_random_buttons(number_of_buttons):
     for _ in range(number_of_buttons):
-        handle_popups()
         buttons = driver.find_elements(By.XPATH, "//button")
         if not buttons:
             print("No buttons on this website...")
@@ -43,14 +42,12 @@ def click_random_buttons(number_of_buttons):
             print(f"clicking button with text: {button.text}")
             driver.execute_script("arguments[0].click();", button)
             time.sleep(1)
-            handle_popups()
         except (ElementNotInteractableException, ElementClickInterceptedException, StaleElementReferenceException) as e:
             print(f"Could not click button: {e}")
 
 
 def click_random_links(number_of_links):
     for _ in range(number_of_links):
-        handle_popups()
         links = driver.find_elements(By.XPATH, "//a")
         if not links:
             print("No links on this Website...")
@@ -68,14 +65,11 @@ def click_random_links(number_of_links):
             time.sleep(1)
             print(f"clicking link with text: {link.text} and URL: {link.get_attribute("href")}")
             driver.execute_script("arguments[0].click();", link)
-            time.sleep(3)
-            handle_popups()
-            return_to_base_URL()
-
+            time.sleep(1)
         except (ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException) as e:
             print(f"Could not click link: {e}")
 
-def interact_with_image(number_of_images):
+def click_random_image(number_of_images):
     for _ in range(number_of_images):
         images = driver.find_elements(By.XPATH, "//img")
         if not images:
@@ -93,7 +87,7 @@ def interact_with_image(number_of_images):
             time.sleep(1)
             print(f"Clicking on Image with text: {image.text}")
             driver.execute_script("arguments[0].click();", image)
-            time.sleep(2)
+            time.sleep(1)
         except (ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException) as e:
             print(f"Could not click on picture: {e}")
 
@@ -106,7 +100,7 @@ def interact_with_email_form():
     #find email and password fields
     email_fields = driver.find_elements(By.XPATH, "//input[@type='email'] | //input[@id='email']")
     password_fields = driver.find_elements(By.XPATH, "//input[@type='password'] | //input[@id='password']")
-    submit_buttons = driver.find_elements(By.XPATH, "//button[@type='submit'] | //button[@id='submit'] | //button[@type='login'] | //button[@id='login']")
+    submit_buttons = driver.find_elements(By.XPATH, "//button[@type='submit'] | //button[@id='submit'] | //button[@type='login'] | //button[@id='login'] | //button[@type='register'] | //button[@id='register']")
     try:
         #Enter Email into email form
         if email_fields:
@@ -115,7 +109,6 @@ def interact_with_email_form():
                 email_field.send_keys(dummy_email)
                 print("Entered Email")
                 time.sleep(1)
-                handle_popups()
         else:
             print("No email-field found")
         #Enter password into password form
@@ -125,7 +118,6 @@ def interact_with_email_form():
                 password_field.send_keys(dummy_pw)
                 print("Entered Password")
                 time.sleep(1)
-                handle_popups()
         else:
             print("No password-field found")
         #Press submit button
@@ -139,7 +131,6 @@ def interact_with_email_form():
                 email_field.send_keys(Keys.ENTER)
                 print("Pressed enter on Email-field")
                 time.sleep(1)
-                handle_popups()
     except Exception as e:
         print(f"Error: {e}")
 
@@ -152,26 +143,34 @@ def handle_popups():
         print("No alert...")
 
 def return_to_base_URL():
-    if driver.current_url != base_URL:
-        driver.get(base_URL)
-    else:
-        driver.switch_to.window(base_tab)
+    print("Returning to base URL")
+    driver.get(base_URL)
+    driver.switch_to.window(base_tab)
+    time.sleep(2)
 
+#main start
+if __name__ == "__main__":
+    options = Options()
+    #service = Service(executable_path="/usr/bin/chromedriver")
+    driver = webdriver.Chrome(options=options)
+    #base_URL = "https://www.webscraper.io"
+    base_URL = "https://www.animetoast.cc/"
+    driver.get(base_URL)
+    base_tab = driver.current_window_handle
+    time.sleep(2)
 
-options = Options()
-
-#service = Service(executable_path="/usr/bin/chromedriver")
-driver = webdriver.Chrome(options=options)
-#base_URL = "https://www.webscraper.io"
-base_URL = "https://www.animetoast.cc/"
-driver.get(base_URL)
-base_tab = driver.current_window_handle
-time.sleep(2)
-
-scroll_full_website()
-interact_with_image(2)
-click_random_buttons(3)
-click_random_links(3)
-interact_with_email_form()
-
-driver.quit()
+    interact_with_email_form()
+    for _ in range(3):
+        for x in range(10):
+            r_num = random.randint(1, 100)
+            handle_popups()
+            if r_num < 50:
+                click_random_links(1)
+            elif r_num < 75:
+                click_random_buttons(1)
+            else:
+                click_random_image(1)
+            time.sleep(1)
+        return_to_base_URL()
+        
+    driver.quit()
